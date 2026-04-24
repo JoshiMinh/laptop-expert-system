@@ -1,14 +1,11 @@
 {
   "name": "laptop-expert-system",
   "private": true,
-  "workspaces": [
-    "frontend"
-  ],
   "scripts": {
-    "dev": "concurrently -n backend,frontend -c cyan,magenta \"python -m uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000\" \"npm run dev -w frontend\"",
+    "dev": "concurrently -n backend,frontend -c cyan,magenta \"python -m uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000\" \"pnpm --filter laptop-expert-system-frontend dev\"",
     "dev:backend": "python -m uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000",
-    "dev:frontend": "npm run dev -w frontend",
-    "build": "npm run build -w frontend"
+    "dev:frontend": "pnpm --filter laptop-expert-system-frontend dev",
+    "build": "pnpm --filter laptop-expert-system-frontend build"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

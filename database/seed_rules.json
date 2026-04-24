@@ -1,0 +1,197 @@
+[
+    {
+        "id": "R01",
+        "priority": 10,
+        "conditions": [{"field": "budget", "operator": "eq", "value": "low"}],
+        "conclusions": {"max_price": 800}
+    },
+    {
+        "id": "R02",
+        "priority": 10,
+        "conditions": [{"field": "budget", "operator": "eq", "value": "medium"}],
+        "conclusions": {"max_price": 1600}
+    },
+    {
+        "id": "R03",
+        "priority": 10,
+        "conditions": [{"field": "budget", "operator": "eq", "value": "high"}],
+        "conclusions": {"max_price": 4000}
+    },
+    {
+        "id": "R04",
+        "priority": 30,
+        "conditions": [{"field": "usage", "operator": "contains_any", "value": ["office"]}],
+        "conclusions": {"preferred_category": "office", "min_ram": 8, "need_gpu": false}
+    },
+    {
+        "id": "R05",
+        "priority": 30,
+        "conditions": [{"field": "usage", "operator": "contains_any", "value": ["coding"]}],
+        "conclusions": {"preferred_category": "coding", "min_ram": 16, "need_gpu": false}
+    },
+    {
+        "id": "R06",
+        "priority": 30,
+        "conditions": [{"field": "usage", "operator": "contains_any", "value": ["gaming"]}],
+        "conclusions": {"preferred_category": "gaming", "min_ram": 16, "need_gpu": true, "min_gpu_vram": 6}
+    },
+    {
+        "id": "R07",
+        "priority": 30,
+        "conditions": [{"field": "usage", "operator": "contains_any", "value": ["design", "content_creation"]}],
+        "conclusions": {"preferred_category": "design", "min_ram": 16, "need_gpu": true}
+    },
+    {
+        "id": "R08",
+        "priority": 30,
+        "conditions": [{"field": "usage", "operator": "contains_any", "value": ["ai"]}],
+        "conclusions": {"preferred_category": "ai", "min_ram": 32, "need_gpu": true, "min_gpu_vram": 8}
+    },
+    {
+        "id": "R09",
+        "priority": 55,
+        "conditions": [
+            {"field": "budget", "operator": "eq", "value": "low"},
+            {"field": "usage", "operator": "contains_any", "value": ["office"]}
+        ],
+        "conclusions": {"preferred_category": "office", "min_ram": 8, "need_gpu": false, "max_price": 700}
+    },
+    {
+        "id": "R10",
+        "priority": 55,
+        "conditions": [
+            {"field": "budget", "operator": "eq", "value": "low"},
+            {"field": "usage", "operator": "contains_any", "value": ["coding"]}
+        ],
+        "conclusions": {"preferred_category": "coding", "min_ram": 16, "need_gpu": false, "max_price": 900}
+    },
+    {
+        "id": "R11",
+        "priority": 55,
+        "conditions": [
+            {"field": "budget", "operator": "eq", "value": "medium"},
+            {"field": "usage", "operator": "contains_any", "value": ["coding"]}
+        ],
+        "conclusions": {"preferred_category": "coding", "min_ram": 16, "need_gpu": false, "max_price": 1400}
+    },
+    {
+        "id": "R12",
+        "priority": 55,
+        "conditions": [
+            {"field": "budget", "operator": "eq", "value": "high"},
+            {"field": "usage", "operator": "contains_any", "value": ["coding"]}
+        ],
+        "conclusions": {"preferred_category": "coding", "min_ram": 32, "need_gpu": false, "max_price": 2500}
+    },
+    {
+        "id": "R13",
+        "priority": 55,
+        "conditions": [
+            {"field": "budget", "operator": "eq", "value": "low"},
+            {"field": "usage", "operator": "contains_any", "value": ["gaming"]}
+        ],
+        "conclusions": {"preferred_category": "gaming", "min_ram": 16, "need_gpu": true, "min_gpu_vram": 6, "max_price": 1000}
+    },
+    {
+        "id": "R14",
+        "priority": 55,
+        "conditions": [
+            {"field": "budget", "operator": "eq", "value": "medium"},
+            {"field": "usage", "operator": "contains_any", "value": ["gaming"]}
+        ],
+        "conclusions": {"preferred_category": "gaming", "min_ram": 16, "need_gpu": true, "min_gpu_vram": 6, "max_price": 1700}
+    },
+    {
+        "id": "R15",
+        "priority": 55,
+        "conditions": [
+            {"field": "budget", "operator": "eq", "value": "high"},
+            {"field": "usage", "operator": "contains_any", "value": ["gaming"]}
+        ],
+        "conclusions": {"preferred_category": "gaming", "min_ram": 32, "need_gpu": true, "min_gpu_vram": 8, "max_price": 3500}
+    },
+    {
+        "id": "R16",
+        "priority": 55,
+        "conditions": [
+            {"field": "budget", "operator": "eq", "value": "medium"},
+            {"field": "usage", "operator": "contains_any", "value": ["design", "content_creation"]}
+        ],
+        "conclusions": {"preferred_category": "design", "min_ram": 16, "need_gpu": true, "max_price": 1800}
+    },
+    {
+        "id": "R17",
+        "priority": 60,
+        "conditions": [
+            {"field": "budget", "operator": "eq", "value": "high"},
+            {"field": "usage", "operator": "contains_any", "value": ["design", "content_creation"]}
+        ],
+        "conclusions": {"preferred_category": "design", "min_ram": 32, "need_gpu": true, "max_price": 3000}
+    },
+    {
+        "id": "R18",
+        "priority": 60,
+        "conditions": [
+            {"field": "budget", "operator": "eq", "value": "high"},
+            {"field": "usage", "operator": "contains_any", "value": ["ai"]}
+        ],
+        "conclusions": {"preferred_category": "ai", "min_ram": 64, "need_gpu": true, "min_gpu_vram": 12, "max_price": 4500}
+    },
+    {
+        "id": "R19",
+        "priority": 58,
+        "conditions": [
+            {"field": "usage", "operator": "contains_all", "value": ["coding", "gaming"]}
+        ],
+        "conclusions": {"preferred_category": "gaming", "min_ram": 32, "need_gpu": true, "min_gpu_vram": 8}
+    },
+    {
+        "id": "R20",
+        "priority": 58,
+        "conditions": [
+            {"field": "usage", "operator": "contains_all", "value": ["coding", "design"]}
+        ],
+        "conclusions": {"preferred_category": "design", "min_ram": 32, "need_gpu": true}
+    },
+    {
+        "id": "R21",
+        "priority": 58,
+        "conditions": [
+            {"field": "usage", "operator": "contains_all", "value": ["office", "portable"]}
+        ],
+        "conclusions": {"preferred_category": "ultraportable", "min_ram": 8, "max_weight_kg": 1.4, "need_gpu": false}
+    },
+    {
+        "id": "R22",
+        "priority": 58,
+        "conditions": [
+            {"field": "usage", "operator": "contains_all", "value": ["gaming", "design"]}
+        ],
+        "conclusions": {"preferred_category": "workstation", "min_ram": 32, "need_gpu": true, "min_gpu_vram": 8}
+    },
+    {
+        "id": "R23",
+        "priority": 58,
+        "conditions": [
+            {"field": "usage", "operator": "contains_all", "value": ["ai", "coding"]}
+        ],
+        "conclusions": {"preferred_category": "ai", "min_ram": 64, "need_gpu": true, "min_gpu_vram": 12}
+    },
+    {
+        "id": "R24",
+        "priority": 58,
+        "conditions": [
+            {"field": "usage", "operator": "contains_any", "value": ["portable"]}
+        ],
+        "conclusions": {"preferred_category": "ultraportable", "max_weight_kg": 1.4, "min_ram": 8, "need_gpu": false}
+    },
+    {
+        "id": "R25",
+        "priority": 58,
+        "conditions": [
+            {"field": "usage", "operator": "contains_any", "value": ["office", "coding"]},
+            {"field": "budget", "operator": "eq", "value": "medium"}
+        ],
+        "conclusions": {"preferred_category": "coding", "min_ram": 16, "max_price": 1400}
+    }
+]

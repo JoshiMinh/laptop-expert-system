@@ -9,3 +9,5 @@ coverage/
 frontend/node_modules/
 frontend/dist/
 backend/.venv/
+*.egg-info/
+.pnpm-debug.log

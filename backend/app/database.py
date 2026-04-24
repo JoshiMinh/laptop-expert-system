@@ -3,11 +3,10 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from sqlalchemy import create_engine, select, func
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from .models import Base, Laptop, Rule
-from .seed_data import LAPTOP_SEEDS, RULE_SEEDS
 
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
@@ -35,14 +34,3 @@ def get_db():
 
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
-    with Session(engine) as session:
-        laptop_count = session.scalar(select(func.count()).select_from(Laptop))
-        rule_count = session.scalar(select(func.count()).select_from(Rule))
-        if laptop_count and rule_count:
-            return
-
-        if not laptop_count:
-            session.add_all([Laptop(**item) for item in LAPTOP_SEEDS])
-        if not rule_count:
-            session.add_all([Rule(**item) for item in RULE_SEEDS])
-        session.commit()

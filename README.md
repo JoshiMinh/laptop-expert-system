@@ -14,7 +14,7 @@ A fully local monorepo for explainable laptop recommendations. The backend is a 
 1. Install the frontend workspace dependencies from the repo root:
 
 ```bash
-npm install
+pnpm install
 ```
 
 2. Install the Python backend environment:
@@ -27,7 +27,7 @@ pip install -e .[dev]
 3. Start both apps from the repo root:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 The frontend runs on `http://127.0.0.1:5173` and the API on `http://127.0.0.1:8000`.
@@ -84,10 +84,16 @@ pytest
 
 ## Database
 
-The app stores data locally in SQLite at `database/laptop_expert_system.sqlite3`. The backend seeds the database automatically on startup if the tables are empty. You can also regenerate it manually with:
+The app stores data locally in SQLite at `database/laptop_expert_system.sqlite3`. The database file is committed to the repository for immediate use.
+
+Backup seed data is stored as JSON files in the `database/` folder:
+- `database/seed_laptops.json`
+- `database/seed_rules.json`
+
+You can restore or regenerate the database from these seeds at any time by running:
 
 ```bash
-python database/seed.py
+python -m database.seed
 ```
 
 ## Notes
@@ -95,3 +101,7 @@ python database/seed.py
 - No external APIs are used.
 - No cloud database is required.
 - Brand filtering is supported as an optional input.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
