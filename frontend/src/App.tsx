@@ -22,7 +22,11 @@ const BUDGET_OPTIONS: Array<{ value: BudgetLevel; label: string; description: st
 export function App() {
   const [budget, setBudget] = useState<BudgetLevel>("medium");
   const [usage, setUsage] = useState<UsageChoice[]>(["coding"]);
-  const [brand, setBrand] = useState("");
+  const [brands, setBrands] = useState<string[]>([]);
+  const [brandQuery, setBrandQuery] = useState("");
+  const [isBrandMenuOpen, setIsBrandMenuOpen] = useState(false);
+  const [brandActiveIndex, setBrandActiveIndex] = useState(0);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [response, setResponse] = useState<RecommendationResponse | null>(null);
@@ -30,9 +34,13 @@ export function App() {
 
   useEffect(() => {
     fetchLaptops()
-      .then(setCatalog)
+      .then((items) => {
+        setCatalog(items);
+        setCatalogError(null);
+      })
       .catch(() => {
         setCatalog([]);
+        setCatalogError("Catalog could not be loaded. Make sure API is running on port 8000.");
       });
   }, []);
 
@@ -44,6 +52,80 @@ export function App() {
     );
   }
 
+  const availableBrands = Array.from(new Set(catalog.map((item) => item.brand))).sort((left, right) =>
+    left.localeCompare(right),
+  );
+
+  const brandSuggestions = availableBrands
+    .filter((brand) => {
+      const query = brandQuery.trim().toLowerCase();
+      const matchesQuery = query.length === 0 || brand.toLowerCase().includes(query);
+      const isAlreadySelected = brands.some((selected) => selected.toLowerCase() === brand.toLowerCase());
+      return matchesQuery && !isAlreadySelected;
+    })
+    .slice(0, 8);
+
+  function addBrand(brandName: string) {
+    const normalized = brandName.trim();
+    if (!normalized) {
+      return;
+    }
+
+    const exactMatch = availableBrands.find((brand) => brand.toLowerCase() === normalized.toLowerCase());
+    const fuzzyMatch = availableBrands.find((brand) => brand.toLowerCase().includes(normalized.toLowerCase()));
+    const nextBrand = exactMatch ?? fuzzyMatch ?? normalized;
+
+    if (!brands.some((item) => item.toLowerCase() === nextBrand.toLowerCase())) {
+      setBrands((current) => [...current, nextBrand]);
+    }
+
+    setBrandQuery("");
+    setBrandActiveIndex(0);
+  }
+
+  function removeBrand(brandName: string) {
+    setBrands((current) => current.filter((item) => item !== brandName));
+  }
+
+  function handleBrandKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      if (brandSuggestions.length > 0) {
+        setIsBrandMenuOpen(true);
+        setBrandActiveIndex((current) => Math.min(current + 1, brandSuggestions.length - 1));
+      }
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      if (brandSuggestions.length > 0) {
+        setIsBrandMenuOpen(true);
+        setBrandActiveIndex((current) => Math.max(current - 1, 0));
+      }
+      return;
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+      if (isBrandMenuOpen && brandSuggestions[brandActiveIndex]) {
+        addBrand(brandSuggestions[brandActiveIndex]);
+      } else {
+        addBrand(brandQuery);
+      }
+      return;
+    }
+
+    if (event.key === "Escape") {
+      setIsBrandMenuOpen(false);
+      return;
+    }
+
+    if (event.key === "Backspace" && brandQuery.length === 0 && brands.length > 0) {
+      setBrands((current) => current.slice(0, -1));
+    }
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setLoading(true);
@@ -53,7 +135,7 @@ export function App() {
       const result = await fetchRecommendations({
         budget,
         usage,
-        brand: brand.trim() || undefined,
+        brands: brands.length > 0 ? brands : undefined,
       });
       setResponse(result);
     } catch (submissionError) {
@@ -71,14 +153,15 @@ export function App() {
       <main className="app-grid">
         <section className="hero-panel">
           <div className="eyebrow">Local rule-based expert system</div>
-          <h1>Laptop recommendations with explainable forward chaining.</h1>
+          <h1>Find the right laptop with transparent rule-based reasoning.</h1>
           <p className="lede">
             Combine your budget and usage needs, then let the rule engine reason over the local SQLite catalog.
           </p>
+          {catalogError ? <p className="catalog-warning">{catalogError}</p> : null}
 
           <div className="stats-row">
             <div className="stat-card">
-              <span>{catalog.length || 15}</span>
+              <span>{catalog.length}</span>
               <p>Seeded laptops</p>
             </div>
             <div className="stat-card">
@@ -93,13 +176,67 @@ export function App() {
 
           <form className="control-panel" onSubmit={handleSubmit}>
             <div className="field-group">
-              <label htmlFor="brand">Optional brand filter</label>
-              <input
-                id="brand"
-                value={brand}
-                onChange={(event) => setBrand(event.target.value)}
-                placeholder="e.g. Lenovo or ASUS"
-              />
+              <label htmlFor="brand-input">Brand filter (optional)</label>
+              <div className="brand-combobox">
+                <div className="brand-input-wrapper">
+                  <div className="brand-chips">
+                    {brands.map((brandName) => (
+                      <span key={brandName} className="brand-chip">
+                        {brandName}
+                        <button
+                          type="button"
+                          className="chip-remove"
+                          onClick={() => removeBrand(brandName)}
+                          aria-label={`Remove ${brandName}`}
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                    <input
+                      id="brand-input"
+                      type="text"
+                      value={brandQuery}
+                      onFocus={() => setIsBrandMenuOpen(true)}
+                      onBlur={() => {
+                        window.setTimeout(() => setIsBrandMenuOpen(false), 120);
+                      }}
+                      onChange={(event) => {
+                        setBrandQuery(event.target.value);
+                        setIsBrandMenuOpen(true);
+                        setBrandActiveIndex(0);
+                      }}
+                      onKeyDown={handleBrandKeyDown}
+                      placeholder={brands.length === 0 ? "Type to search brands" : "Add another brand..."}
+                      className="brand-text-input"
+                      autoComplete="off"
+                    />
+                  </div>
+                </div>
+                {isBrandMenuOpen ? (
+                  <div className="brand-dropdown" role="listbox" aria-label="Brand suggestions">
+                    {brandSuggestions.length > 0 ? (
+                      brandSuggestions.map((brandName, index) => (
+                        <button
+                          key={brandName}
+                          type="button"
+                          className={index === brandActiveIndex ? "brand-option active" : "brand-option"}
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            addBrand(brandName);
+                          }}
+                          onMouseEnter={() => setBrandActiveIndex(index)}
+                        >
+                          <strong>{brandName}</strong>
+                          <span>{catalog.filter((item) => item.brand === brandName).length} models</span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="brand-empty">No matching brands found.</div>
+                    )}
+                  </div>
+                ) : null}
+              </div>
             </div>
 
             <div className="field-group">

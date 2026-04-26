@@ -11,7 +11,7 @@ BudgetLevel = Literal["low", "medium", "high"]
 class RecommendRequest(BaseModel):
     budget: BudgetLevel
     usage: list[str] = Field(min_length=1)
-    brand: str | None = None
+    brands: list[str] | None = None
     min_battery_hours: int | None = Field(default=None, ge=0)
 
 

@@ -27,8 +27,6 @@ class LaptopRecommender:
             "budget": request.budget,
             "usage": request.usage,
         }
-        if request.brand:
-            initial_facts["brand"] = request.brand.strip().lower()
         if request.min_battery_hours is not None:
             initial_facts["min_battery_hours"] = request.min_battery_hours
 
@@ -63,12 +61,12 @@ class LaptopRecommender:
         min_ram = int(facts.get("min_ram", 8))
         need_gpu = bool(facts.get("need_gpu", False))
         max_weight_kg = facts.get("max_weight_kg")
-        brand_filter = request.brand.strip().lower() if request.brand else None
+        brand_filters = [b.strip().lower() for b in request.brands] if request.brands else []
         min_battery_hours = request.min_battery_hours if request.min_battery_hours is not None else None
 
         ranked: list[LaptopRecommendation] = []
         for laptop in laptops:
-            if brand_filter and laptop.brand.lower() != brand_filter:
+            if brand_filters and laptop.brand.lower() not in brand_filters:
                 continue
             if min_battery_hours is not None and (laptop.battery_hours or 0) < min_battery_hours:
                 continue

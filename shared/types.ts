@@ -12,7 +12,7 @@ export type UsageChoice =
 export interface RecommendRequest {
   budget: BudgetLevel;
   usage: UsageChoice[];
-  brand?: string;
+  brands?: string[];
   min_battery_hours?: number;
 }
 
