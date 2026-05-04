@@ -1,107 +1,249 @@
 # Laptop Expert System
 
-A fully local monorepo for explainable laptop recommendations. The backend is a FastAPI service with a custom forward-chaining inference engine, SQLite persistence, and seed data. The frontend is a Vite React app that collects budget and usage needs and displays ranked results plus a reasoning trace.
+A fully local **monorepo** for explainable laptop recommendations using AI and expert system techniques. This project combines three integrated components:
 
-## Structure
+- **Backend**: FastAPI service with a custom forward-chaining inference engine
+- **Frontend**: Vite React app for user interface  
+- **Prolog Logic**: Academic Prolog implementations for expert system reasoning
 
-- `backend/` FastAPI API, inference engine, SQLAlchemy models, tests
-- `frontend/` Vite React UI
-- `shared/` shared TypeScript interfaces
-- `database/` SQLite schema and seed script
+## 📋 Project Overview
 
-## Setup
+The Laptop Expert System is an intelligent recommendation engine that helps users find the perfect laptop based on their budget and usage needs. It provides complete explainability by showing the reasoning trace of how recommendations were generated.
 
-1. Install the frontend workspace dependencies from the repo root:
+### Key Features
+
+- **Local-First Design**: No external APIs or cloud databases required
+- **Complete Explainability**: All recommendations include reasoning traces showing which rules fired
+- **SQLite Persistence**: Local database for instant availability
+- **Forward Chaining Inference**: Automatic rule-based reasoning
+- **Fuzzy Logic**: Handles vague concepts like "expensive," "lightweight," "gaming laptop"
+- **Certainty Factor**: Quantifies confidence in recommendations
+- **Meta-Rules**: Resolves conflicts between competing requirements
+- **Multiple Interfaces**: API-first backend with React frontend and Prolog logic system
+
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
-pnpm install
+# Install all dependencies (backend + frontend)
+pnpm i
 ```
 
-2. Install the Python backend environment:
+### Running the Application
 
+```bash
+# Start both backend and frontend simultaneously
+pnpm dev
+```
+
+- **Frontend**: http://127.0.0.1:5173
+- **Backend API**: http://127.0.0.1:8000
+
+### Alternative: Run Components Separately
+
+```bash
+# Backend only
+pnpm run dev:backend
+# API Docs: http://127.0.0.1:8000/docs
+
+# Frontend only  
+pnpm run dev:frontend
+```
+
+### Production Build
+
+```bash
+pnpm run build
+```
+
+## 🧠 How It Works
+
+### Backend Inference Engine
+
+The backend uses **forward chaining**:
+
+1. Build working memory from user input (budget, usage needs, preferences)
+2. Load rule set from SQLite database
+3. Find all rules whose conditions match current facts
+4. Resolve conflicts using rule complexity, priority, and ID ordering
+5. Fire selected rule and update working memory
+6. Repeat until no new rules apply
+
+### API Endpoints
+
+#### `POST /recommend`
+
+Get personalized recommendations based on user needs.
+
+**Request:**
+```json
+{
+  "budget": "medium",
+  "usage": ["coding", "portable"],
+  "preferences": {
+    "brands": ["Dell", "ASUS"],
+    "max_weight": 1.5
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "recommendations": [
+    {
+      "id": 1,
+      "name": "Dell XPS 13",
+      "price": 1299,
+      "reasoning": ["Rule 1 fired", "Rule 3 fired"]
+    }
+  ]
+}
+```
+
+#### `GET /laptops`
+
+Returns the complete laptop catalog from the database.
+
+## 🔬 Prolog Expert System
+
+The Prolog implementation provides academic expert system techniques: Fuzzy Logic, Heuristics, Certainty Factor, Meta-Rules, and Backward Chaining.
+
+### Running Prolog Advisor
+
+The Prolog system runs independently via SWI-Prolog. First, install SWI-Prolog:
+- **Windows**: [Download from swi-prolog.org](https://www.swi-prolog.org/Download.html)
+- **macOS**: `brew install swi-prolog`
+- **Linux (Ubuntu)**: `sudo apt-get install swi-prolog`
+- **Linux (Fedora)**: `sudo dnf install swi-prolog`
+
+Then run manually:
+
+```bash
+cd prolog
+swipl
+```
+
+In SWI-Prolog:
+```prolog
+?- consult('advisor.pl').
+```
+
+### Example Queries
+
+```prolog
+% Find best laptop for gaming with 35M budget, lightweight
+?- tu_van_top_k_giai_thich(gaming, 35000000, [mong_nhe], 3, TopK, CanhBao).
+
+% Find office laptops under 20M
+?- tu_van_laptop(van_phong, 20000000, [], Ten, Gia, CF).
+
+% Find graphics design laptop, top budget
+?- tu_van_top_k_giai_thich(do_hoa, 50000000, [cao_cap], 5, TopK, CanhBao).
+```
+
+### Prolog Parameters
+
+**Usage (NhuCau):**
+- `van_phong` - Office work
+- `lap_trinh` - General programming  
+- `lap_trinh_ios` - iOS development
+- `do_hoa` - Graphics design
+- `gaming` - Gaming
+- `ai_data_science` - AI/Machine Learning
+
+**Budget (NganSach):** Vietnamese Dong (VND)
+- Examples: `10000000`, `35000000`, `100000000`
+
+**Constraints (YeuCauThem):**
+- `[]` - No requirements
+- `[gia_rat_re, mong_nhe]` - Very cheap, lightweight
+- `[cao_cap, uu_tien_hieu_nang]` - Premium, performance priority
+- `[thich_thuong_hieu('Dell'), gpu_roi]` - Prefer Dell with dedicated GPU
+
+## 💾 Database
+
+The application uses a local SQLite database at `database/laptop.db` which is tracked in git for immediate availability.
+
+### Regenerating Database
+
+To restore or regenerate from seed data:
+
+```bash
+cd backend
+python -m database.seed
+```
+
+## 🧪 Testing
+
+Run backend tests:
+
+```bash
+cd backend
+pytest
+```
+
+## 🛠️ Development
+
+### Backend Development
+
+Technologies:
+- **FastAPI** for REST API
+- **SQLAlchemy** for ORM
+- **Pydantic** for data validation
+- **pytest** for testing
+
+### Frontend Development
+
+Technologies:
+- **React 18** with TypeScript
+- **Vite** for build tooling
+- **CSS modules** for styling
+
+## 📚 Documentation
+
+- **[REQUIREMENTS.md](REQUIREMENTS.md)** - Detailed system requirements and setup
+- **prolog/advisor.pl** - Prolog expert system logic
+- **prolog/db.pl** - Prolog laptop database
+
+## 🔍 Troubleshooting
+
+### "Cannot find module" Error
+```bash
+pnpm i
+```
+
+### "ModuleNotFoundError: No module named 'fastapi'"
 ```bash
 cd backend
 pip install -e .[dev]
 ```
 
-3. Start both apps from the repo root:
+### SWI-Prolog Not Found
 
-```bash
-pnpm run dev
-```
+For Prolog setup issues, see [REQUIREMENTS.md](REQUIREMENTS.md#prolog-logic-system).
 
-The frontend runs on `http://127.0.0.1:5173` and the API on `http://127.0.0.1:8000`.
+## 📁 Project Structure
 
-If you only want the API, run this from inside `backend/`:
+- **backend/** - Python FastAPI service with inference engine
+- **frontend/** - Vite React application
+- **prolog/** - SWI-Prolog expert system implementation
+- **database/** - SQLite database and schemas
+- **shared/** - Shared TypeScript interfaces
 
-```bash
-uvicorn main:app --reload
-```
+## 🤝 Contributing
 
-## How inference works
+Contributions welcome! Please ensure:
+1. Backend tests pass: `pytest`
+2. Frontend builds: `pnpm run build`
+3. Code follows existing patterns
+4. New features include tests and documentation
 
-The engine uses forward chaining:
-
-1. Start with working memory built from the request facts such as budget and usage.
-2. Load the rule set from SQLite.
-3. Find all rules whose conditions match the current facts.
-4. Resolve conflicts by selecting the rule with the most conditions first, then the highest priority, then a deterministic rule id order.
-5. Fire the selected rule, update working memory, and repeat until no new rules apply.
-
-The response includes both the fired rules and the final recommendation explanations.
-
-## Rule examples
-
-- `budget = low` and `usage contains office` -> `preferred_category = office`, `max_price = 700`
-- `budget = medium` and `usage contains coding` -> `preferred_category = coding`, `min_ram = 16`
-- `usage contains gaming` -> `preferred_category = gaming`, `need_gpu = true`
-- `usage contains all of coding + gaming` -> `preferred_category = gaming`, `min_ram = 32`
-
-## API
-
-### `POST /recommend`
-
-Input:
-
-```json
-{
-  "budget": "medium",
-  "usage": ["coding", "portable"]
-}
-```
-
-### `GET /laptops`
-
-Returns the full laptop catalog from SQLite.
-
-## Tests
-
-Run backend tests from the `backend/` directory:
-
-```bash
-pytest
-```
-
-## Database
-
-The app stores data locally in SQLite at `database/laptop_expert_system.sqlite3`. The database file is committed to the repository for immediate use.
-
-Backup seed data is stored as JSON files in the `database/` folder:
-- `database/seed_laptops.json`
-- `database/seed_rules.json`
-
-You can restore or regenerate the database from these seeds at any time by running:
-
-```bash
-python -m database.seed
-```
-
-## Notes
-
-- No external APIs are used.
-- No cloud database is required.
-- Brand filtering is supported as an optional input.
-
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+**Last Updated**: 2026 | **Status**: Production Ready

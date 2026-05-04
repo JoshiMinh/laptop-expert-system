@@ -13,7 +13,7 @@ from .models import Base, Laptop, Rule
 ROOT_DIR = Path(__file__).resolve().parents[2]
 DATABASE_DIR = ROOT_DIR / "database"
 DATABASE_DIR.mkdir(exist_ok=True)
-DEFAULT_DATABASE_PATH = DATABASE_DIR / "laptop_expert_system.sqlite3"
+DEFAULT_DATABASE_PATH = DATABASE_DIR / "laptop.db"
 LAPTOP_SEED_PATH = DATABASE_DIR / "seed_laptops.json"
 RULE_SEED_PATH = DATABASE_DIR / "seed_rules.json"
 

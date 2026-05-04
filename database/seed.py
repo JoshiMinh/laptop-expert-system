@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-DATABASE_PATH = ROOT_DIR / "database" / "laptop_expert_system.sqlite3"
+DATABASE_PATH = ROOT_DIR / "database" / "laptop.db"
 SCHEMA_PATH = ROOT_DIR / "database" / "schema.sql"
 LAPTOPS_JSON_PATH = ROOT_DIR / "database" / "seed_laptops.json"
 RULES_JSON_PATH = ROOT_DIR / "database" / "seed_rules.json"

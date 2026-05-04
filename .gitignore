@@ -1,13 +1,59 @@
+# Python
 __pycache__/
 *.py[cod]
-*.sqlite3
 .pytest_cache/
+.coverage
+coverage/
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Virtual Environments
 .venv/
+venv/
+ENV/
+env/
+backend/.venv/
+backend/venv/
+
+# Node/npm/pnpm
 node_modules/
 dist/
-coverage/
-frontend/node_modules/
-frontend/dist/
-backend/.venv/
-*.egg-info/
 .pnpm-debug.log
+pnpm-error.log
+npm-debug.log
+yarn-error.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build output
+frontend/dist/
+backend/dist/
+frontend/node_modules/
+*.egg-info/
+
+# Logs
+*.log
+logs/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary files
+tmp/
+temp/
+*.tmp
