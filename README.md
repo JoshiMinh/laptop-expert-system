@@ -1,249 +1,146 @@
 # Laptop Expert System
 
-A fully local **monorepo** for explainable laptop recommendations using AI and expert system techniques. This project combines three integrated components:
+A local, explainable recommendation system for selecting laptops. This repository
+contains three cooperating components that together provide explainable, rule-based
+recommendations with a modern web UI and an academic Prolog advisor for research
+and reproducibility.
 
-- **Backend**: FastAPI service with a custom forward-chaining inference engine
-- **Frontend**: Vite React app for user interface  
-- **Prolog Logic**: Academic Prolog implementations for expert system reasoning
+Contents in brief:
+- Backend: Python FastAPI service with a forward-chaining inference engine
+- Frontend: Vite + React TypeScript user interface
+- Prolog: SWI-Prolog expert system (advisor) for alternate reasoning and research
+- Database: SQLite files and JSON seed data for reproducible datasets
 
-## 📋 Project Overview
+Table of contents
+- Purpose
+- Quick start (install & run)
+- Database and seeding
+- Backend API (endpoints & examples)
+- Prolog advisor (usage)
+- Development & testing
+- Troubleshooting
 
-The Laptop Expert System is an intelligent recommendation engine that helps users find the perfect laptop based on their budget and usage needs. It provides complete explainability by showing the reasoning trace of how recommendations were generated.
+Purpose
+-------
+The Laptop Expert System helps users find laptops matching budget, usage, and
+preference constraints while preserving full explainability: every recommendation
+includes the reasoning trace (which rules fired and why).
 
-### Key Features
+Quick start
+-----------
+Prerequisites:
+- Node.js and pnpm (for frontend)
+- Python 3.10+ and pip (for backend)
+- Optional: SWI-Prolog (for the Prolog advisor)
 
-- **Local-First Design**: No external APIs or cloud databases required
-- **Complete Explainability**: All recommendations include reasoning traces showing which rules fired
-- **SQLite Persistence**: Local database for instant availability
-- **Forward Chaining Inference**: Automatic rule-based reasoning
-- **Fuzzy Logic**: Handles vague concepts like "expensive," "lightweight," "gaming laptop"
-- **Certainty Factor**: Quantifies confidence in recommendations
-- **Meta-Rules**: Resolves conflicts between competing requirements
-- **Multiple Interfaces**: API-first backend with React frontend and Prolog logic system
-
-## 🚀 Quick Start
-
-### Installation
+Install project dependencies:
 
 ```bash
-# Install all dependencies (backend + frontend)
-pnpm i
+pnpm install
 ```
 
-### Running the Application
+Run frontend and backend concurrently (development):
 
 ```bash
-# Start both backend and frontend simultaneously
 pnpm dev
 ```
 
-- **Frontend**: http://127.0.0.1:5173
-- **Backend API**: http://127.0.0.1:8000
-
-### Alternative: Run Components Separately
+Individual components:
 
 ```bash
-# Backend only
+# Start backend only (runs on :8000)
 pnpm run dev:backend
-# API Docs: http://127.0.0.1:8000/docs
 
-# Frontend only  
+# Start frontend only (default Vite port)
 pnpm run dev:frontend
 ```
 
-### Production Build
+Database
+--------
+The project uses a tracked SQLite database file at database/laptop.db. The
+database file is included in the repository to provide immediate, deterministic
+data for demos and tests. There is no active seeding workflow in primary
+development — the repository uses the checked-in `database/laptop.db`.
 
-```bash
-pnpm run build
-```
+If you need to regenerate or migrate the database, do so intentionally and
+coordinate with maintainers; removing or changing the tracked DB will affect
+everyone cloning the repo.
 
-## 🧠 How It Works
+Backend API
+-----------
+The backend exposes REST endpoints for recommendations and catalog access.
 
-### Backend Inference Engine
+Main endpoints:
+- `POST /recommend` — request personalized recommendations
+- `GET /laptops` — return catalog entries
 
-The backend uses **forward chaining**:
+Example request for `/recommend`:
 
-1. Build working memory from user input (budget, usage needs, preferences)
-2. Load rule set from SQLite database
-3. Find all rules whose conditions match current facts
-4. Resolve conflicts using rule complexity, priority, and ID ordering
-5. Fire selected rule and update working memory
-6. Repeat until no new rules apply
-
-### API Endpoints
-
-#### `POST /recommend`
-
-Get personalized recommendations based on user needs.
-
-**Request:**
 ```json
 {
   "budget": "medium",
   "usage": ["coding", "portable"],
-  "preferences": {
-    "brands": ["Dell", "ASUS"],
-    "max_weight": 1.5
-  }
+  "preferences": { "brands": ["Dell"], "max_weight": 1.6 }
 }
 ```
 
-**Response:**
-```json
-{
-  "recommendations": [
-    {
-      "id": 1,
-      "name": "Dell XPS 13",
-      "price": 1299,
-      "reasoning": ["Rule 1 fired", "Rule 3 fired"]
-    }
-  ]
-}
-```
+Responses include a `reasoning` field showing which rules fired and the
+confidence for each recommendation.
 
-#### `GET /laptops`
-
-Returns the complete laptop catalog from the database.
-
-## 🔬 Prolog Expert System
-
-The Prolog implementation provides academic expert system techniques: Fuzzy Logic, Heuristics, Certainty Factor, Meta-Rules, and Backward Chaining.
-
-### Running Prolog Advisor
-
-The Prolog system runs independently via SWI-Prolog. First, install SWI-Prolog:
-- **Windows**: [Download from swi-prolog.org](https://www.swi-prolog.org/Download.html)
-- **macOS**: `brew install swi-prolog`
-- **Linux (Ubuntu)**: `sudo apt-get install swi-prolog`
-- **Linux (Fedora)**: `sudo dnf install swi-prolog`
-
-Then run manually:
+Prolog advisor (optional)
+-------------------------
+The Prolog advisor is an independent component for experimentation and teaching.
+Install SWI-Prolog and run the advisor like this:
 
 ```bash
 cd prolog
-swipl
+swipl -s advisor.pl
 ```
 
-In SWI-Prolog:
-```prolog
-?- consult('advisor.pl').
-```
+Use the provided queries in `prolog/advisor.pl` for example consultations.
 
-### Example Queries
-
-```prolog
-% Find best laptop for gaming with 35M budget, lightweight
-?- tu_van_top_k_giai_thich(gaming, 35000000, [mong_nhe], 3, TopK, CanhBao).
-
-% Find office laptops under 20M
-?- tu_van_laptop(van_phong, 20000000, [], Ten, Gia, CF).
-
-% Find graphics design laptop, top budget
-?- tu_van_top_k_giai_thich(do_hoa, 50000000, [cao_cap], 5, TopK, CanhBao).
-```
-
-### Prolog Parameters
-
-**Usage (NhuCau):**
-- `van_phong` - Office work
-- `lap_trinh` - General programming  
-- `lap_trinh_ios` - iOS development
-- `do_hoa` - Graphics design
-- `gaming` - Gaming
-- `ai_data_science` - AI/Machine Learning
-
-**Budget (NganSach):** Vietnamese Dong (VND)
-- Examples: `10000000`, `35000000`, `100000000`
-
-**Constraints (YeuCauThem):**
-- `[]` - No requirements
-- `[gia_rat_re, mong_nhe]` - Very cheap, lightweight
-- `[cao_cap, uu_tien_hieu_nang]` - Premium, performance priority
-- `[thich_thuong_hieu('Dell'), gpu_roi]` - Prefer Dell with dedicated GPU
-
-## 💾 Database
-
-The application uses a local SQLite database at `database/laptop.db` which is tracked in git for immediate availability.
-
-### Regenerating Database
-
-To restore or regenerate from seed data:
-
-```bash
-cd backend
-python -m database.seed
-```
-
-## 🧪 Testing
-
-Run backend tests:
+Development & testing
+---------------------
+Backend:
+- Project uses FastAPI, Pydantic, and simple SQLite persistence.
+- Run backend tests from the backend folder:
 
 ```bash
 cd backend
 pytest
 ```
 
-## 🛠️ Development
+Frontend:
+- Built with React + TypeScript and Vite. Start the dev server with
+  `pnpm run dev:frontend` and build for production with `pnpm run build`.
 
-### Backend Development
+Recreating or migrating the database in CI or locally
+- Coordinate DB changes with maintainers. If you prefer regenerating from
+  scratch, create a reproducible migration or dataset script and open a PR so
+  it can be reviewed and versioned.
 
-Technologies:
-- **FastAPI** for REST API
-- **SQLAlchemy** for ORM
-- **Pydantic** for data validation
-- **pytest** for testing
+Troubleshooting
+---------------
+- Missing Python dependencies: ensure you have a virtualenv and run
+  `pip install -r backend/requirements.txt` (or equivalent project setup).
+- If SWI-Prolog is not found, install it from https://www.swi-prolog.org/
 
-### Frontend Development
+Where to look next
+------------------
+- Backend inference logic: `backend/inference/` (engine and reasoning code)
+- API definitions: `backend/app/main.py` and `backend/schemas.py`
+- Prolog advisor: `prolog/advisor.pl` and `prolog/db.pl`
 
-Technologies:
-- **React 18** with TypeScript
-- **Vite** for build tooling
-- **CSS modules** for styling
+Contributing
+------------
+- Run backend tests and ensure frontend builds before opening a PR.
+- Add tests for new inference rules and update seed data if needed.
 
-## 📚 Documentation
+License
+-------
+MIT — see the LICENSE file for details.
 
-- **[REQUIREMENTS.md](REQUIREMENTS.md)** - Detailed system requirements and setup
-- **prolog/advisor.pl** - Prolog expert system logic
-- **prolog/db.pl** - Prolog laptop database
+Files changed in this update:
+- Updated repository README to summarize purpose, usage, and manuals.
 
-## 🔍 Troubleshooting
-
-### "Cannot find module" Error
-```bash
-pnpm i
-```
-
-### "ModuleNotFoundError: No module named 'fastapi'"
-```bash
-cd backend
-pip install -e .[dev]
-```
-
-### SWI-Prolog Not Found
-
-For Prolog setup issues, see [REQUIREMENTS.md](REQUIREMENTS.md#prolog-logic-system).
-
-## 📁 Project Structure
-
-- **backend/** - Python FastAPI service with inference engine
-- **frontend/** - Vite React application
-- **prolog/** - SWI-Prolog expert system implementation
-- **database/** - SQLite database and schemas
-- **shared/** - Shared TypeScript interfaces
-
-## 🤝 Contributing
-
-Contributions welcome! Please ensure:
-1. Backend tests pass: `pytest`
-2. Frontend builds: `pnpm run build`
-3. Code follows existing patterns
-4. New features include tests and documentation
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-**Last Updated**: 2026 | **Status**: Production Ready
+Last updated: 2026
