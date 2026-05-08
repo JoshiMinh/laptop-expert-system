@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Optional, Tuple
@@ -267,7 +267,7 @@ def main() -> None:
         else:
             brand_requirement = f"thich_thuong_hieu({_quote_atom(brand_label)})"
 
-        submit = st.button("Chạy tư vấn", type="primary", width="stretch")
+        submit = st.button("Chạy tư vấn", type="primary", use_container_width=True)
 
     requirements = list(traits)
     if brand_requirement:
@@ -299,7 +299,7 @@ def main() -> None:
                     }
                 )
 
-            st.dataframe(table_rows, width="stretch", hide_index=True)
+            st.dataframe(table_rows, use_container_width=True, hide_index=True)
 
             for index, row in enumerate(result["rows"], start=1):
                 with st.expander(f"#{index} {row['name']}"):

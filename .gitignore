@@ -1,59 +1,30 @@
-# Python
+# Byte-compiled / optimized files
 __pycache__/
 *.py[cod]
-.pytest_cache/
-.coverage
-coverage/
-htmlcov/
-*.egg-info/
-dist/
-build/
 
-# Virtual Environments
+# Virtual environment
 .venv/
 venv/
-ENV/
-env/
-backend/.venv/
-backend/venv/
 
-# Node/npm/pnpm
-node_modules/
-dist/
-.pnpm-debug.log
-pnpm-error.log
-npm-debug.log
-yarn-error.log
+# Test / coverage
+.pytest_cache/
+.coverage
 
-# IDE
+# Editor directories
 .vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-*.iml
 
 # Environment
 .env
-.env.local
-.env.*.local
 
-# Build output
-frontend/dist/
-backend/dist/
-frontend/node_modules/
+# Packaging
+dist/
+build/
 *.egg-info/
 
-# Logs
-*.log
-logs/
-
 # OS
-Thumbs.db
 .DS_Store
+Thumbs.db
 
-# Temporary files
-tmp/
-temp/
-*.tmp
+# Swap files
+*.swp
+*.swo
