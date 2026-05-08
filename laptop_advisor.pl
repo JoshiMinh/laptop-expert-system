@@ -1,5 +1,5 @@
 % ============================================================
-%  advisor.pl (Phiên bản Hoàn Chỉnh Tuyệt Đối)
+%  laptop_advisor.pl (Phiên bản Hoàn Chỉnh Tuyệt Đối)
 %  He chuyen gia tu van chon mua laptop
 %  Bao gom: Fuzzy Logic + Heuristics (CPU Suffix) + CF (Brand) 
 %           + Meta-rules (Impossible Budget) + Backward Chaining
@@ -7,7 +7,7 @@
 % ============================================================
 
 :- encoding(utf8).
-:- consult('db.pl').
+:- consult('laptop_database.pl').
 
 % ============================================================
 % 1) TIEN ICH CHUNG

@@ -1,30 +1,15 @@
-# Byte-compiled / optimized files
+# Python bytecode
 __pycache__/
 *.py[cod]
 
-# Virtual environment
+# Local virtual environments
 .venv/
 venv/
+env/
 
-# Test / coverage
+# Test and coverage artifacts
 .pytest_cache/
 .coverage
 
-# Editor directories
-.vscode/
-
-# Environment
-.env
-
-# Packaging
-dist/
-build/
-*.egg-info/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Swap files
-*.swp
-*.swo
+# Streamlit configuration
+.streamlit/
