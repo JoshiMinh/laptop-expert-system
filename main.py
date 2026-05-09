@@ -8,18 +8,15 @@ presentation with confidence scoring.
 
 from __future__ import annotations
 
+import asyncio
+import sys
 from pathlib import Path
 from typing import Any, Optional, Tuple
 
-import streamlit as st
+if sys.platform == "win32" and hasattr(asyncio, "WindowsSelectorEventLoopPolicy"):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-# Fix Windows asyncio issue on import
-try:
-    import asyncio
-    if hasattr(asyncio, 'WindowsSelectorEventLoopPolicy'):
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-except Exception:
-    pass
+import streamlit as st
 
 try:
     from pyswip import Prolog
@@ -34,26 +31,31 @@ ADVISOR_PATH = APP_DIR / "laptop_advisor.pl"
 
 # UI option mappings for workload types
 NEED_OPTIONS = [
-    ("Văn phòng", "van_phong"),
-    ("Lập trình", "lap_trinh"),
-    ("Lập trình iOS", "lap_trinh_ios"),
-    ("Đồ họa", "do_hoa"),
+    ("Office", "office"),
+    ("Programming", "programming"),
+    ("iOS Development", "ios_development"),
+    ("Graphics / Design", "graphics"),
     ("Gaming", "gaming"),
     ("AI / Data Science", "ai_data_science"),
 ]
 
 # UI option mappings for device traits
 TRAIT_OPTIONS = [
-    ("Mỏng nhẹ", "mong_nhe"),
-    ("Pin trâu", "pin_trau"),
-    ("Giá rẻ", "gia_re"),
-    ("Tầm trung", "tam_trung"),
-    ("Màn hình lớn", "man_to"),
-    ("GPU rời", "gpu_roi"),
-    ("GPU onboard", "gpu_onboard"),
+    ("Lightweight", "lightweight"),
+    ("Long battery life", "long_battery_life"),
+    ("Budget-friendly", "budget_friendly"),
+    ("Mid-range", "mid_range"),
+    ("Large display", "large_display"),
+    ("Discrete GPU", "discrete_gpu"),
+    ("Integrated GPU", "integrated_gpu"),
 ]
 
 BRAND_OPTIONS = ["acer", "asus", "dell", "gigabyte", "hp", "apple"]
+NO_BRAND_LABEL = "No preference"
+MIN_BUDGET = 1_000_000
+MAX_BUDGET = 200_000_000
+DEFAULT_BUDGET = 35_000_000
+MAX_TOP_K = 10
 
 
 # ==================== Utility Functions ====================
@@ -96,7 +98,7 @@ def _trait_to_prolog_atom(trait: str) -> str:
     Returns:
         Valid Prolog atom representation
     """
-    if trait in {"mong_nhe", "pin_trau", "gia_re", "tam_trung", "man_to", "gpu_roi", "gpu_onboard"}:
+    if trait in {"lightweight", "long_battery_life", "budget_friendly", "mid_range", "large_display", "discrete_gpu", "integrated_gpu"}:
         return trait
     return trait
 
@@ -130,6 +132,32 @@ def _normalize_warning(value: Any) -> str:
     if warning in {"none", "[]", "", "null"}:
         return ""
     return warning
+
+
+def _format_currency(value: Optional[int]) -> str:
+    if value is None:
+        return "N/A"
+    return f"VND {value:,}"
+
+
+def _validate_inputs(need: str, min_budget: int, max_budget: int, requirements: list[str], top_k: int) -> None:
+    valid_needs = {option_value for _, option_value in NEED_OPTIONS}
+    valid_traits = {option_value for _, option_value in TRAIT_OPTIONS}
+
+    if need not in valid_needs:
+        raise ValueError(f"Invalid workload type: {need}")
+    if not (MIN_BUDGET <= min_budget <= MAX_BUDGET) or not (MIN_BUDGET <= max_budget <= MAX_BUDGET):
+        raise ValueError(f"Budget values must be between VND {MIN_BUDGET:,} and VND {MAX_BUDGET:,}")
+    if min_budget > max_budget:
+        raise ValueError("Minimum budget cannot be greater than maximum budget")
+    if not (1 <= top_k <= MAX_TOP_K):
+        raise ValueError(f"Top-K must be between 1 and {MAX_TOP_K}")
+
+    for requirement in requirements:
+        if requirement.startswith("preferred_brand("):
+            continue
+        if requirement not in valid_traits:
+            raise ValueError(f"Invalid requirement atom: {requirement}")
 
 # ==================== Result Parsing Functions ====================
 
@@ -282,7 +310,7 @@ def load_prolog() -> Prolog:
     return engine
 
 
-def build_query(need: str, budget: int, requirements: list[str], top_k: int) -> str:
+def build_query(need: str, min_budget: int, max_budget: int, requirements: list[str], top_k: int) -> str:
     """Construct a Prolog query for laptop recommendations.
     
     Args:
@@ -295,10 +323,11 @@ def build_query(need: str, budget: int, requirements: list[str], top_k: int) -> 
         Formatted Prolog query string
     """
     extra = "[" + ", ".join(requirements) + "]" if requirements else "[]"
-    return f"tu_van_top_k_giai_thich({need}, {budget}, {extra}, {top_k}, TopK, CanhBao)"
+    # Use the Prolog range-aware wrapper (min/max budget)
+    return f"recommend_top_k_range({need}, {min_budget}, {max_budget}, {extra}, {top_k}, TopK, Warning)"
 
 
-def run_recommendation(need: str, budget: int, requirements: list[str], top_k: int) -> dict[str, Any]:
+def run_recommendation(need: str, min_budget: int, max_budget: int, requirements: list[str], top_k: int) -> dict[str, Any]:
     """Execute Prolog recommendation query and process results.
     
     Args:
@@ -313,14 +342,16 @@ def run_recommendation(need: str, budget: int, requirements: list[str], top_k: i
         - 'warning': Warning message from Prolog (if any)
         - 'query': The executed Prolog query (for debugging)
     """
+    _validate_inputs(need, min_budget, max_budget, requirements, top_k)
+
     engine = load_prolog()
-    query = build_query(need, budget, requirements, top_k)
+    query = build_query(need, min_budget, max_budget, requirements, top_k)
     results = list(engine.query(query, maxresult=1))
     
     if not results:
         return {
             "rows": [],
-            "warning": "Không có kết quả phù hợp.",
+            "warning": "No matching laptops were found.",
             "query": query,
         }
 
@@ -357,62 +388,73 @@ def main() -> None:
     """, unsafe_allow_html=True)
 
     st.title("💼 Prolog Laptop Advisor")
-    st.markdown("Intelligent laptop recommendations powered by Prolog logic rules and confidence scoring")
+    st.markdown("Intelligent laptop recommendations powered by Prolog logic rules and confidence scoring.")
     st.divider()
 
     # ===== Sidebar: Input Form =====
     with st.sidebar:
-        st.header("⚙️ Consultation Form")
+        st.header("⚙️ Recommendation Form")
         
         # Workload selection
         need_label = st.selectbox(
-            "🎯 **Nhu cầu**",
+            "🎯 **Workload**",
             [label for label, _ in NEED_OPTIONS],
             index=4
         )
         need = _label_to_value(NEED_OPTIONS, need_label)
 
-        # Budget input
-        budget = st.number_input(
-            "💰 **Ngân sách (VND)**",
-            min_value=1_000_000,
-            max_value=200_000_000,
-            value=35_000_000,
-            step=500_000,
-            help="Set your maximum budget in Vietnamese Dong"
-        )
+        # Budget range inputs (min / max)
+        col_min, col_max = st.columns(2)
+        with col_min:
+            min_budget = st.number_input(
+                "💰 Min budget (VND)",
+                min_value=MIN_BUDGET,
+                max_value=MAX_BUDGET,
+                value=MIN_BUDGET,
+                step=500_000,
+                help="Minimum budget in VND."
+            )
+        with col_max:
+            max_budget = st.number_input(
+                "💰 Max budget (VND)",
+                min_value=MIN_BUDGET,
+                max_value=MAX_BUDGET,
+                value=DEFAULT_BUDGET,
+                step=500_000,
+                help="Maximum budget in VND."
+            )
 
         # Results count slider
         top_k = st.slider(
-            "📊 **Số kết quả**",
+            "📊 **Number of results**",
             min_value=1,
-            max_value=10,
+            max_value=MAX_TOP_K,
             value=5,
-            help="Number of recommendations to display"
+            help="Number of recommendations to display."
         )
 
         # Additional traits
         trait_labels = st.multiselect(
-            "✨ **Yêu cầu thêm**",
+            "✨ **Additional preferences**",
             [label for label, _ in TRAIT_OPTIONS],
-            default=["Mỏng nhẹ"],
-            help="Select additional device characteristics"
+            default=["Lightweight"],
+            help="Select additional device characteristics."
         )
         traits = [_trait_to_prolog_atom(_label_to_value(TRAIT_OPTIONS, label)) for label in trait_labels]
 
         # Brand preference
         brand_label = st.selectbox(
-            "🏢 **Thương hiệu ưu tiên**",
-            ["(không chọn)", *BRAND_OPTIONS],
+            "🏢 **Preferred brand**",
+            [NO_BRAND_LABEL, *BRAND_OPTIONS],
             index=0
         )
         brand_requirement = None
-        if brand_label != "(không chọn)":
-            brand_requirement = f"thich_thuong_hieu({_quote_atom(brand_label)})"
+        if brand_label != NO_BRAND_LABEL:
+            brand_requirement = f"preferred_brand({_quote_atom(brand_label)})"
 
         # Submit button
         st.divider()
-        submit = st.button("🚀 Chạy tư vấn", type="primary", width='stretch')
+        submit = st.button("🚀 Run recommendation", type="primary", width='stretch')
 
     # ===== Main Content: Results Display =====
     requirements = list(traits)
@@ -422,7 +464,10 @@ def main() -> None:
     if submit:
         with st.spinner("⏳ Querying Prolog advisor..."):
             try:
-                result = run_recommendation(need, int(budget), requirements, top_k)
+                result = run_recommendation(need, int(min_budget), int(max_budget), requirements, top_k)
+            except ValueError as exc:
+                st.error(f"❌ {exc}")
+                st.stop()
             except Exception as exc:  # pragma: no cover - runtime integration guard
                 st.error(f"❌ Prolog execution failed: {exc}")
                 st.stop()
@@ -444,7 +489,7 @@ def main() -> None:
                 table_rows.append({
                     "#": index,
                     "Laptop": row["name"],
-                    "Giá (VND)": f"₫{row['price']:,}" if row["price"] else "N/A",
+                    "Price": _format_currency(row["price"]),
                     "Confidence": confidence_pct,
                 })
 
@@ -458,7 +503,7 @@ def main() -> None:
                 with st.expander(f"**#{index}** {row['name']} — {confidence_pct}"):
                     col1, col2 = st.columns(2)
                     with col1:
-                        st.metric("Price", f"₫{row['price']:,}" if row["price"] else "N/A")
+                        st.metric("Price", _format_currency(row["price"]))
                     with col2:
                         st.metric("Confidence", confidence_pct)
                     if row["raw"]:
@@ -470,7 +515,7 @@ def main() -> None:
             st.caption("Use this to verify how your inputs were translated to Prolog.")
     else:
         # Initial state message
-        st.info("👈 Adjust your consultation parameters in the sidebar and click **Chạy tư vấn** to get recommendations.")
+        st.info("👈 Adjust the settings in the sidebar and click **Run recommendation** to get recommendations.")
 
 
 if __name__ == "__main__":

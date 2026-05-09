@@ -1,4 +1,4 @@
-% Cấu trúc: laptop(Tên, Hãng, Giá, CPU, GPU, RAM, SSD, MànHinh, Pin, KhốiLượng).
+% Structure: laptop(Name, Brand, Price, CPU, GPU, RAM, SSD, Screen, Battery, Weight).
 
 laptop('Laptop Acer Aspire 7 A715-59G-57TU', 'acer', 21990000, 'Intel Core i5-12450H', 'GeForce RTX 3050', 16, 512, 15.6, 54.0, 2.0).
 laptop('Laptop Acer Nitro ProPanel ANV16S-71-58WQ', 'acer', 39990000, 'Intel Core 5 210H', 'GeForce RTX 5050', 16, 512, 16.0, 76.0, 2.1).
