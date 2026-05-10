@@ -1,146 +1,151 @@
-# Laptop Expert System
+# 💼 Prolog Laptop Expert System
 
-A local, explainable recommendation system for selecting laptops. This repository
-contains three cooperating components that together provide explainable, rule-based
-recommendations with a modern web UI and an academic Prolog advisor for research
-and reproducibility.
+A Streamlit app that uses Prolog rules to recommend laptops based on budget, workload,
+and user preferences. The Python app bridges to Prolog via `pyswip` and displays
+ranked recommendations with confidence scores.
 
-Contents in brief:
-- Backend: Python FastAPI service with a forward-chaining inference engine
-- Frontend: Vite + React TypeScript user interface
-- Prolog: SWI-Prolog expert system (advisor) for alternate reasoning and research
-- Database: SQLite files and JSON seed data for reproducible datasets
+---
 
-Table of contents
-- Purpose
-- Quick start (install & run)
-- Database and seeding
-- Backend API (endpoints & examples)
-- Prolog advisor (usage)
-- Development & testing
-- Troubleshooting
+## ✨ Highlights
 
-Purpose
--------
-The Laptop Expert System helps users find laptops matching budget, usage, and
-preference constraints while preserving full explainability: every recommendation
-includes the reasoning trace (which rules fired and why).
+- Interactive sidebar form to collect workload, budget, traits, and brand preference
+- Prolog-backed reasoning engine for deterministic, explainable recommendations
+- Ranked Top-K results with confidence scores and expandable details
+- Raw Prolog query viewer for debugging and rule inspection
 
-Quick start
------------
-Prerequisites:
-- Node.js and pnpm (for frontend)
-- Python 3.10+ and pip (for backend)
-- Optional: SWI-Prolog (for the Prolog advisor)
+---
 
-Install project dependencies:
+## System Requirements
+
+- Python 3.11 or newer
+- SWI-Prolog (separate system package; must be installed and on your `PATH`)
+- A POSIX-like or Windows PowerShell environment (virtualenv recommended)
+
+Note: `SWI-Prolog` is a system dependency, not a pip package. Verify with:
 
 ```bash
-pnpm install
+swipl --version
 ```
 
-Run frontend and backend concurrently (development):
+---
+
+## Python Dependencies (current)
+
+The repository `requirements.txt` currently lists the Python packages (no pinned
+versions):
+
+- `streamlit`
+- `pyswip`
+
+Important notes:
+
+- `pyswip` is a Python wrapper that requires SWI-Prolog to be installed on your
+    system. Installing `pyswip` alone via pip is not sufficient.
+- The `requirements.txt` has no version pins. For reproducible installs consider
+    pinning versions or generating a locked file after you validate the environment
+    (e.g. `pip freeze > requirements.txt`). Leave as-is if you prefer flexible installs.
+
+---
+
+## Installation
+
+1. Create and activate a virtual environment.
+
+Windows (PowerShell):
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+macOS / Linux:
 
 ```bash
-pnpm dev
+python -m venv .venv
+source .venv/bin/activate
 ```
 
-Individual components:
+2. Install Python dependencies:
 
 ```bash
-# Start backend only (runs on :8000)
-pnpm run dev:backend
-
-# Start frontend only (default Vite port)
-pnpm run dev:frontend
+pip install -r requirements.txt
 ```
 
-Database
---------
-The project uses a tracked SQLite database file at database/laptop.db. The
-database file is included in the repository to provide immediate, deterministic
-data for demos and tests. There is no active seeding workflow in primary
-development — the repository uses the checked-in `database/laptop.db`.
+3. Install SWI-Prolog:
 
-If you need to regenerate or migrate the database, do so intentionally and
-coordinate with maintainers; removing or changing the tracked DB will affect
-everyone cloning the repo.
+- Windows: Download installer from https://www.swi-prolog.org or use Chocolatey:
 
-Backend API
------------
-The backend exposes REST endpoints for recommendations and catalog access.
-
-Main endpoints:
-- `POST /recommend` — request personalized recommendations
-- `GET /laptops` — return catalog entries
-
-Example request for `/recommend`:
-
-```json
-{
-  "budget": "medium",
-  "usage": ["coding", "portable"],
-  "preferences": { "brands": ["Dell"], "max_weight": 1.6 }
-}
+```powershell
+choco install swi-prolog
 ```
 
-Responses include a `reasoning` field showing which rules fired and the
-confidence for each recommendation.
+- macOS: `brew install swi-prolog`
+- Linux: use your distro package manager, e.g. `apt install swi-prolog`
 
-Prolog advisor (optional)
--------------------------
-The Prolog advisor is an independent component for experimentation and teaching.
-Install SWI-Prolog and run the advisor like this:
+Verify `swipl` is on `PATH` before running the app.
+
+---
+
+## Running the App
+
+Always use Streamlit's runner so the web server and UI lifecycle are initialized
+correctly. From the project root run:
 
 ```bash
-cd prolog
-swipl -s advisor.pl
+streamlit run main.py
+# or equivalently:
+python -m streamlit run main.py
 ```
 
-Use the provided queries in `prolog/advisor.pl` for example consultations.
+Why `streamlit run`?
 
-Development & testing
----------------------
-Backend:
-- Project uses FastAPI, Pydantic, and simple SQLite persistence.
-- Run backend tests from the backend folder:
+- `streamlit run` starts Streamlit's HTTP server, sets up its runtime environment,
+    and manages reruns/hot-reload and session state. Running `python main.py`
+    executes the file as a plain Python script and will not start Streamlit's
+    server in the same way — the UI may not appear or behave as expected.
 
-```bash
-cd backend
-pytest
-```
+If you prefer to experiment, you can `python main.py` in some environments, but
+`streamlit run` is the supported and recommended invocation.
 
-Frontend:
-- Built with React + TypeScript and Vite. Start the dev server with
-  `pnpm run dev:frontend` and build for production with `pnpm run build`.
+---
 
-Recreating or migrating the database in CI or locally
-- Coordinate DB changes with maintainers. If you prefer regenerating from
-  scratch, create a reproducible migration or dataset script and open a PR so
-  it can be reviewed and versioned.
+## Usage
 
-Troubleshooting
----------------
-- Missing Python dependencies: ensure you have a virtualenv and run
-  `pip install -r backend/requirements.txt` (or equivalent project setup).
-- If SWI-Prolog is not found, install it from https://www.swi-prolog.org/
+1. Open the sidebar and select a workload (Office, Programming, iOS Development,
+     Graphics, Gaming, or AI/Data Science).
+2. Enter a min/max budget in VND.
+3. Select additional trait preferences and an optional preferred brand.
+4. Click "Run recommendation" to fetch results.
+5. Expand entries for details and view the raw Prolog query under Debug.
 
-Where to look next
-------------------
-- Backend inference logic: `backend/inference/` (engine and reasoning code)
-- API definitions: `backend/app/main.py` and `backend/schemas.py`
-- Prolog advisor: `prolog/advisor.pl` and `prolog/db.pl`
+---
 
-Contributing
-------------
-- Run backend tests and ensure frontend builds before opening a PR.
-- Add tests for new inference rules and update seed data if needed.
+## Project Files
 
-License
--------
-MIT — see the LICENSE file for details.
+- `main.py` — Streamlit UI and Prolog bridge
+- `laptop_advisor.pl` — Prolog rules and ranking logic
+- `laptop_database.pl` — Laptop facts database
+- `requirements.txt` — Python dependencies (no pinned versions)
 
-Files changed in this update:
-- Updated repository README to summarize purpose, usage, and manuals.
+---
 
-Last updated: 2026
+## Troubleshooting
+
+- If `pyswip` fails to import, ensure SWI-Prolog is installed and `swipl` is on
+    your `PATH` and then reinstall `pyswip` inside the active virtualenv.
+- On Windows, set the asyncio event loop policy as shown in `main.py` (already
+    handled by the app) to avoid event-loop issues.
+- If the UI does not appear, confirm you launched with `streamlit run main.py`.
+
+---
+
+## Final Notes
+
+- The `requirements.txt` is minimal and unpinned by design. If you want a
+    reproducible environment, pin versions after validating a working setup.
+- If you'd like, I can update `requirements.txt` to add pinned versions or
+    include dev/test dependencies — tell me which approach you prefer.
+
+---
+
+Happy testing! If you want, I can also add a short CONTRIBUTING or DEV guide.
