@@ -1,4 +1,6 @@
-# 💼 Prolog Laptop Expert System
+# 💻 Prolog Laptop Expert System
+
+![Preview](preview.png)
 
 A Streamlit app that uses Prolog rules to recommend laptops based on budget, workload,
 and user preferences. The Python app bridges to Prolog via `pyswip` and displays

@@ -374,7 +374,7 @@ def main() -> None:
     """Render the Streamlit application interface and handle user interactions."""
     st.set_page_config(
         page_title="Prolog Laptop Advisor",
-        page_icon="💼",
+        page_icon="💻",
         layout="wide",
         initial_sidebar_state="expanded"
     )
@@ -387,7 +387,7 @@ def main() -> None:
         </style>
     """, unsafe_allow_html=True)
 
-    st.title("💼 Prolog Laptop Advisor")
+    st.title("💻 Prolog Laptop Advisor")
     st.markdown("Intelligent laptop recommendations powered by Prolog logic rules and confidence scoring.")
     st.divider()
 
